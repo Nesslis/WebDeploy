@@ -28,7 +28,7 @@ const AdminHome: React.FC = () => {
   const [isActive, setIsActive] = useState(true);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const { onResetPassword, onLogout } = useAuth();
+  const { onResetPassword } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
@@ -147,19 +147,6 @@ const AdminHome: React.FC = () => {
     setIsActive(true);
   };
 
-  const handleLogout = async () => {
-    try {
-      if (onLogout) {
-        await onLogout();
-        window.location.href = '/';
-      } else {
-        console.error('Error while log out');
-      }
-    } catch (error) {
-      console.error('Error occured', error);
-    }
-  };
-
   const handleResetPassword = async () => {
     // Check if passwords match
     if (password !== confirmPassword) {
@@ -235,7 +222,7 @@ const AdminHome: React.FC = () => {
           </Button>
           <Button
             onClick={() => {
-              handleLogout();
+              window.location.href = '/';
               onCloseDrawer();
             }}
           >
