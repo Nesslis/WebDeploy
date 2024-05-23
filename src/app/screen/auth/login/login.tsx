@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './login.css'; // Import the CSS file
-
+import { useAuth } from '../../../context/AuthContext.tsx';
+import { Modal, Box, Typography, Button} from '@mui/material';
+import './login.css'; 
 interface Credentials {
-  email: string;
+  username: string;
   password: string;
 }
 
 const LoginPage: React.FC = () => {
   const [credentials, setCredentials] = useState<Credentials>({
-    email: '',
+    username: '',
     password: ''
   });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const {onLogin} = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -21,9 +24,35 @@ const LoginPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setCredentials({
+      username:'',
+      password:''
+    })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Submitted credentials:', credentials);
+    if(!onLogin){
+      console.log('Login is unavailable');
+    }
+    else {
+    try {
+      const response = await onLogin(credentials.username, credentials.password);
+      if (response.error){
+        console.log(response.msg);
+      }
+      else{
+        console.log("Success ",response);
+        setShowSuccessModal(true);
+        resetForm();
+      }
+    }
+    catch (error) {
+      console.log("Unexpected error occurred. Please try again later");
+    }
+  }
   };
 
   return (
@@ -35,10 +64,10 @@ const LoginPage: React.FC = () => {
           <div className="form-group">
             <input
               type="text"
-              id="email"
-              name="email"
-              placeholder='Email : '
-              value={credentials.email}
+              id="usename"
+              name="username"
+              placeholder='Username : '
+              value={credentials.username}
               onChange={handleChange}
               required
             />
@@ -66,8 +95,35 @@ const LoginPage: React.FC = () => {
           </div>
         </form>
       </div>
+      <Modal
+        open={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Success
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            Account created successfully!
+          </Typography>
+          <Button onClick={() => setShowSuccessModal(false)} sx={{marginTop:3}}>
+            Close
+          </Button>
+        </Box>
+      </Modal>
     </div>
   );
 };
-
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+};
 export default LoginPage;

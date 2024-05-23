@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { FaUser, FaEnvelope } from 'react-icons/fa';
-import './register.css';
+import { FaUser, FaEnvelope} from 'react-icons/fa';
+import { registerAgency } from '../../../context/AdminApi.tsx';
 import { Link } from 'react-router-dom';
 import MyCheckbox from '../../../components/checkbox/checkbox.tsx';
-
+import { Modal, Box, Typography, Button} from '@mui/material';
+import './register.css';
 interface RegistrationInfo {
   name: string;
   agencyName: string;
@@ -16,6 +17,7 @@ const RegisterPage: React.FC = () => {
     agencyName: '',
     email: ''
   });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -24,12 +26,35 @@ const RegisterPage: React.FC = () => {
       [name]: value
     }));
   };
+  const resetForm = () => {
+    setRegistrationInfo({
+      name:'',
+      agencyName:'',
+      email:'',
+    })
+  }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit =  async(e: React.FormEvent) => {
     e.preventDefault();
-    // Here you can perform registration validation and submission using registrationInfo
-    // For simplicity, let's just log the registration info to the console
     console.log('Submitted registration info:', registrationInfo);
+    try {
+      const response = await registerAgency(
+        registrationInfo.name,
+        registrationInfo.agencyName,
+        registrationInfo.email,
+        true 
+      );
+
+      if (response.error) {
+        console.log(response.msg);
+      } else {
+        console.log('Registration successful:', response);
+        setShowSuccessModal(true); 
+        resetForm();
+      }
+    } catch (error) {
+      console.log('Unexpected error occurred. Please try again later');
+    }
   };
 
   return (
@@ -81,8 +106,35 @@ const RegisterPage: React.FC = () => {
           </div>
           </form>
         </div>
+        <Modal
+        open={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Success
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            Account created successfully!
+          </Typography>
+          <Button onClick={() => setShowSuccessModal(false)} sx={{marginTop:3}}>
+            Close
+          </Button>
+        </Box>
+      </Modal>
         </div>
   );
 };
-
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+};
 export default RegisterPage;

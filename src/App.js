@@ -1,5 +1,4 @@
 import React from 'react';
-import './App.css'; 
 import Home from './app/screen/home/home.tsx';
 import RegisterPage from './app/screen/auth/register/register.tsx';
 import LoginPage from './app/screen/auth/login/login.tsx';
@@ -10,9 +9,12 @@ import { Header } from './app/components/header/header.tsx';
 import MapPage from './app/map/hotels.tsx';
 import AdminHome  from './app/admin/home/adminHomePage.tsx';
 import SuperAdmin from './app/superAdmin/superAdmin.tsx';
+import { AuthProvider } from './app/context/AuthContext.tsx';
+import './App.css'; 
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <Header/>
       <Routes> 
@@ -26,6 +28,7 @@ function App() {
         <Route path='/superAdmin' element={<SuperAdmin/>} />
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }
 
